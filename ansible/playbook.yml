@@ -1,0 +1,36 @@
+- name: Setup Kubernetes nodes
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update system packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Disable swap
+      command: swapoff -a
+
+    - name: Install Kubernetes packages
+      yum:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    - name: Enable kubelet
+      service:
+        name: kubelet
+        enabled: yes

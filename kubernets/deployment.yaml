@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expense-splitter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expense-splitter
+  template:
+    metadata:
+      labels:
+        app: expense-splitter
+    spec:
+      containers:
+        - name: devops-app
+          image: whisper02/expense-splitter:latest
+          ports:
+            - containerPort: 5000
