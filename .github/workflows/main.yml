@@ -39,3 +39,9 @@ jobs:
             kubectl apply -f kubernetes/deployment.yaml
             kubectl apply -f kubernetes/service.yaml
           EOF
+
+      - name: Test SSH connection
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+          ssh -v -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
