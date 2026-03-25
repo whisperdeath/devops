@@ -4,8 +4,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Expense Splitter API "
-    return "API is working "
+    return "API is working! "
+
 
 @app.route("/split", methods=["POST"])
 def split():
