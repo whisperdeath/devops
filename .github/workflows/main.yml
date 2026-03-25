@@ -7,32 +7,29 @@ on:
 jobs:
 
   test:
-    name: Run Python Tests
+    name: Run Tests
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.12' # Matches your Flask 3.1.3 requirement
-          cache: 'pip'
+          node-version: 18
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest # Installing test runner if not in requirements
         working-directory: ./app
+        run: npm install
 
-      - name: Run Tests
-        run: |
-          # This runs all files starting with test_*.py
-          pytest
+      - name: Run tests
         working-directory: ./app
+        run: npm test
+
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
+    needs: test   # 🔥 IMPORTANT
 
     steps:
       - uses: actions/checkout@v4
