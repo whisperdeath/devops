@@ -7,82 +7,61 @@ HTML_PAGE = """
 <html>
 <head>
     <title>Expense Splitter</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
+            background: linear-gradient(to right, #667eea, #764ba2);
             min-height: 100vh;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-        }
-
-        .section {
-            background: rgba(255,255,255,0.9);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .expenses-row {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .expenses-row input {
-            flex: 1;
+        .card {
+            border-radius: 20px;
+            padding: 20px;
+            width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .expenses-row button {
-            flex: 0 0 auto;
-        }
-
-        #result {
-            background: #fff3cd;
+        .result-box {
+            background: #f8f9fa;
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        }
-
-        .btn-add {
-            margin-top: 10px;
+            margin-top: 15px;
         }
     </style>
 </head>
+
 <body>
-    <h1> Expense Splitter</h1>
 
-    <div class="section">
-        <h4>People</h4>
-        <input id="people" class="form-control" placeholder="Enter people, comma separated">
+<div class="card">
+    <h3 class="text-center mb-3">💰 Expense Splitter</h3>
+
+    <div class="mb-3">
+        <label class="form-label">People</label>
+        <input id="people" class="form-control" placeholder="Alice, Bob, Charlie">
     </div>
 
-    <div class="section">
-        <h4>Expenses</h4>
+    <div>
+        <label class="form-label">Expenses</label>
         <div id="expenses"></div>
-        <button class="btn btn-sm btn-secondary btn-add" onclick="addExpense()">+ Add Expense</button>
+
+        <button class="btn btn-sm btn-secondary mt-2" onclick="addExpense()">+ Add Expense</button>
     </div>
 
-    <div class="section text-center">
-        <button class="btn btn-primary w-50" onclick="calculate()">Split Expenses</button>
-    </div>
+    <button class="btn btn-primary w-100 mt-3" onclick="calculate()">Split</button>
 
-    <div class="section" id="result">
-        <h5>Results will appear here...</h5>
-    </div>
+    <div class="result-box mt-3" id="result"></div>
+</div>
 
 <script>
 function addExpense() {
     const div = document.createElement("div");
-    div.className = "expenses-row";
+    div.className = "d-flex gap-2 mt-2";
 
     div.innerHTML = `
         <input class="form-control name" placeholder="Name">
@@ -97,34 +76,53 @@ function addExpense() {
 addExpense();
 
 function calculate() {
-    const people = document.getElementById("people").value.split(",").map(p => p.trim()).filter(p => p);
+    const people = document.getElementById("people").value
+        .split(",")
+        .map(p => p.trim())
+        .filter(p => p);
+
     const expenseDivs = document.querySelectorAll("#expenses > div");
     let expenses = [];
 
     expenseDivs.forEach(div => {
         const name = div.querySelector(".name").value.trim();
         const amount = parseFloat(div.querySelector(".amount").value);
-        if (name && !isNaN(amount)) expenses.push({ paid_by: name, amount });
+
+        if (name && !isNaN(amount)) {
+            expenses.push({ paid_by: name, amount: amount });
+        }
     });
 
     fetch("/split", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({ people, expenses })
     })
     .then(res => res.json())
-    .then(data => displayResult(data));
+    .then(data => displayResult(data))
+    .catch(() => {
+        document.getElementById("result").innerHTML =
+            "<div class='text-danger'>Something went wrong</div>";
+    });
 }
 
 function displayResult(data) {
     let html = "<h5>Balances</h5>";
+
     const balances = data.balances || data;
 
     for (let person in balances) {
         let value = balances[person];
-        if (value > 0) html += `<div class="text-success">🟢 ${person} gets ${value.toFixed(2)}</div>`;
-        else if (value < 0) html += `<div class="text-danger">🔴 ${person} owes ${Math.abs(value).toFixed(2)}</div>`;
-        else html += `<div>⚪ ${person} is settled</div>`;
+
+        if (value > 0) {
+            html += `<div class="text-success">🟢 ${person} gets ${value.toFixed(2)}</div>`;
+        } else if (value < 0) {
+            html += `<div class="text-danger">🔴 ${person} owes ${Math.abs(value).toFixed(2)}</div>`;
+        } else {
+            html += `<div>⚪ ${person} is settled</div>`;
+        }
     }
 
     if (data.transactions && data.transactions.length > 0) {
@@ -137,6 +135,7 @@ function displayResult(data) {
     document.getElementById("result").innerHTML = html;
 }
 </script>
+
 </body>
 </html>
 """
