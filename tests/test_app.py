@@ -14,4 +14,5 @@ def test_home_status_code(client):
 
 def test_home_content(client):
     response = client.get("/")
-    assert b"API is working!" in response.data
+
+    assert b"Expense Splitter" in response.data
