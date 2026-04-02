@@ -144,6 +144,10 @@ function displayResult(data) {
 def home():
     return render_template_string(HTML_PAGE)
 
+@app.route("/api")
+def api_status():
+    return "API is working!"
+
 
 @app.route("/split", methods=["POST"])
 def split():
